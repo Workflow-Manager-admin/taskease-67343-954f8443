@@ -261,10 +261,8 @@ function App() {
   const [theme, setTheme] = useState(() => {
     const saved = window.localStorage.getItem('tfe_theme_mode');
     if (saved) return saved;
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      return 'light';
-    }
-    return 'dark';
+    // Default to light mode on first load
+    return 'light';
   });
 
   useEffect(() => {
