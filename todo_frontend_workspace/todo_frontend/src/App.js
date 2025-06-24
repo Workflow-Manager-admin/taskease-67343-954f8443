@@ -5,7 +5,7 @@ import './App.css';
 PUBLIC_INTERFACE
 TaskItem Component
 
-Renders an individual task, including its details and action buttons for editing, deleting, and completion status.
+A modern, minimalistic card for an individual task, with animated check toggle, refined icons, and subtle effects.
 Props:
 - task: Object (task data)
 - onEdit: function(task) => void
@@ -14,30 +14,40 @@ Props:
 */
 function TaskItem({ task, onEdit, onDelete, onToggleComplete }) {
   return (
-    <div className={`task-card${task.completed ? ' completed' : ''}`}>
+    <div
+      className={`task-card${task.completed ? ' completed' : ''}`}
+      tabIndex={0}
+      aria-label={`${task.completed ? 'Completed' : 'Incomplete'} task: ${task.title}`}
+      style={{ animation: 'fadeInUp 0.42s cubic-bezier(.3,.81,.52,1.02)' }}
+    >
       <div className="task-main">
-        <input
-          type="checkbox"
-          checked={task.completed}
-          onChange={() => onToggleComplete(task.id)}
-          aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
-        />
+        <label className="checkbox-custom">
+          <input
+            type="checkbox"
+            checked={task.completed}
+            onChange={() => onToggleComplete(task.id)}
+            aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+          />
+          <span />
+        </label>
         <span className="task-title">{task.title}</span>
       </div>
       <div className="task-actions">
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary btn-anim"
           title="Edit Task"
+          aria-label="Edit Task"
           onClick={() => onEdit(task)}
         >
-          ✏️
+          <span role="img" aria-label="Edit">✏️</span>
         </button>
         <button
-          className="btn btn-danger"
+          className="btn btn-danger btn-anim"
           title="Delete Task"
+          aria-label="Delete Task"
           onClick={() => onDelete(task.id)}
         >
-          🗑️
+          <span role="img" aria-label="Delete">🗑️</span>
         </button>
       </div>
     </div>
@@ -48,7 +58,7 @@ function TaskItem({ task, onEdit, onDelete, onToggleComplete }) {
 PUBLIC_INTERFACE
 TaskForm Component
 
-Displays a form for adding a new task or editing an existing one.
+Enhanced modern To Do input form with floating label and built-in animation cues.
 Props:
 - onSubmit: function({title, id?}) => void
 - editingTask: object (current task to edit) or null
@@ -56,8 +66,9 @@ Props:
 */
 function TaskForm({ onSubmit, editingTask, onCancel }) {
   const [title, setTitle] = useState(editingTask ? editingTask.title : '');
+  const [inputFocused, setInputFocused] = useState(false);
 
-  // If editingTask changes, reset input to match task title
+  // Reset input when editingTask changes
   React.useEffect(() => {
     setTitle(editingTask ? editingTask.title : '');
   }, [editingTask]);
@@ -70,24 +81,38 @@ function TaskForm({ onSubmit, editingTask, onCancel }) {
   };
 
   return (
-    <form className="task-form" onSubmit={handleSubmit} autoComplete="off">
-      <input
-        className="task-input"
-        type="text"
-        placeholder={editingTask ? "Edit task" : "What needs to be done?"}
-        maxLength={120}
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        aria-label="Task title"
-        autoFocus
-      />
-      <button className="btn btn-primary" type="submit">
+    <form
+      className="task-form"
+      onSubmit={handleSubmit}
+      autoComplete="off"
+      style={{ animation: 'fadeInDown 0.40s cubic-bezier(.44,.89,.63,1.15)' }}
+    >
+      <div className={`input-wrapper${inputFocused || title ? ' focus' : ''}`}>
+        <input
+          className="task-input"
+          type="text"
+          placeholder=" "
+          maxLength={120}
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          aria-label="Task title"
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
+          autoFocus
+        />
+        <span className="floating-label">
+          {editingTask ? "Edit your task" : "Add a new task"}
+        </span>
+      </div>
+      <button className="btn btn-primary" type="submit" aria-label={editingTask ? "Update Task" : "Add Task"}>
         {editingTask ? "Update" : "Add"}
       </button>
       {editingTask && (
         <button
           className="btn btn-secondary"
           type="button"
+          style={{ marginLeft: 4 }}
+          aria-label="Cancel Edit"
           onClick={onCancel}
         >
           Cancel
@@ -101,7 +126,7 @@ function TaskForm({ onSubmit, editingTask, onCancel }) {
 PUBLIC_INTERFACE
 TaskList Component
 
-Displays the list of tasks in cards, sorted with incomplete tasks on top.
+Lists tasks in animated cards, showing empty state when needed.
 Props:
 - tasks: array of task objects
 - onEdit, onDelete, onToggleComplete: handlers passed to TaskItem
@@ -112,8 +137,8 @@ function TaskList({ tasks, onEdit, onDelete, onToggleComplete }) {
   );
   if (sortedTasks.length === 0) {
     return (
-      <div className="empty-state">
-        <span>📝 No tasks yet. Add your first task above!</span>
+      <div className="empty-state fadein-delay">
+        <span>📝 No tasks yet. <span className="empty-highlight">Add your first task above!</span></span>
       </div>
     );
   }
@@ -135,12 +160,13 @@ function TaskList({ tasks, onEdit, onDelete, onToggleComplete }) {
 
 /*
 App Component
-- Layout: fixed header, centered list and form.
-- Minimal, modern dark design using CSS variables and classes from App.css.
-- All components are ready for API integration but use in-memory mock state for now.
+  - Responsive single-page layout
+  - Minimal, modern dark design
+  - Subtle animations for improved experience
+  - All CRUD and UI-state logic is retained
 */
 function App() {
-  // Example tasks for demonstration before API integration:
+  // Demo tasks for initial render
   const initialTasks = [
     { id: 1, title: 'Read a book 📖', completed: false },
     { id: 2, title: 'Create a To Do app ✔️', completed: true },
@@ -148,7 +174,6 @@ function App() {
   const [tasks, setTasks] = useState(initialTasks);
   const [editingTask, setEditingTask] = useState(null);
 
-  // Simulating add/edit:
   const handleAddOrEdit = ({ title, id }) => {
     if (id) {
       setTasks(tasks =>
@@ -172,20 +197,18 @@ function App() {
 
   return (
     <div className="app">
-      <nav className="navbar">
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <div className="logo">
-              <span className="logo-symbol">*</span> TaskEase
-            </div>
-            <span className="navbar-right">Modern To-Do List App</span>
-          </div>
+      <nav className="navbar glassy">
+        <div className="container navbar-row">
+          <span className="logo" tabIndex={0} aria-label="TaskEase Logo">
+            <span className="logo-symbol">*</span> TaskEase
+          </span>
+          <span className="navbar-right">Modern To-Do List App</span>
         </div>
       </nav>
       <main className="main-content">
         <div className="container task-container">
           <div className="section">
-            <h1 className="title" style={{ fontSize: '2.2rem', marginTop: 26 }}>
+            <h1 className="title shrinkin">
               {editingTask ? "Edit Task" : "Add a Task"}
             </h1>
             <TaskForm
@@ -195,7 +218,7 @@ function App() {
             />
           </div>
           <div className="section">
-            <h2 className="subtitle" style={{ marginTop: 32, marginBottom: 12 }}>
+            <h2 className="subtitle fadein-delay" style={{ marginTop: 32, marginBottom: 12 }}>
               Your Tasks
             </h2>
             <TaskList
@@ -208,7 +231,14 @@ function App() {
         </div>
       </main>
       <footer className="footer">
-        <div className="container" style={{ padding: '16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13 }}>
+        <div className="container"
+          style={{
+            padding: '16px',
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+            fontSize: 13
+          }}
+        >
           © {new Date().getFullYear()} TaskEase &mdash; Modern To-Do App UI
         </div>
       </footer>
