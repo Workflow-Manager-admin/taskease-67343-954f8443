@@ -23,3 +23,33 @@ modules by path ./.ve/ 15.1 KiB
     ./node_modules/css-loader/dist/cjs.js!./.ve/EditorOverlay.css 697 bytes [built] [code generated]
   ./.ve/EditorOverlay.jsx 1.58 KiB [built] [code generated]
 webpack 5.99.9 compiled successfully in 1299 ms
+assets by status 1.98 KiB [cached] 1 asset
+assets by path *.js 1.42 MiB
+  asset bundle.js 1.4 MiB [emitted] (name: main)
+  asset main.e700307e818a78aea631.hot-update.js 14.5 KiB [emitted] [immutable] [hmr] (name: main)
+asset main.e700307e818a78aea631.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main 1.42 MiB = bundle.js 1.4 MiB main.e700307e818a78aea631.hot-update.js 14.5 KiB
+cached modules 1.26 MiB [cached] 41 modules
+runtime modules 27.5 KiB 14 modules
+./src/App.js 10.3 KiB [built] [code generated]
+webpack 5.99.9 compiled successfully in 171 ms
+assets by status 1.98 KiB [cached] 1 asset
+assets by path *.js 1.41 MiB
+  asset bundle.js 1.4 MiB [emitted] (name: main)
+  asset main.622b6ac99f9e6c801216.hot-update.js 4.65 KiB [emitted] [immutable] [hmr] (name: main)
+asset main.622b6ac99f9e6c801216.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main 1.41 MiB = bundle.js 1.4 MiB main.622b6ac99f9e6c801216.hot-update.js 4.65 KiB
+cached modules 1.27 MiB [cached] 41 modules
+runtime modules 27.5 KiB 14 modules
+./node_modules/css-loader/dist/cjs.js!./src/App.css 2.19 KiB [built] [code generated]
+webpack 5.99.9 compiled successfully in 45 ms
+assets by status 1.98 KiB [cached] 1 asset
+assets by path *.js 1.41 MiB
+  asset bundle.js 1.4 MiB [emitted] (name: main)
+  asset main.6e5fff6653b4b5c4f500.hot-update.js 7.5 KiB [emitted] [immutable] [hmr] (name: main)
+asset main.6e5fff6653b4b5c4f500.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main 1.41 MiB = bundle.js 1.4 MiB main.6e5fff6653b4b5c4f500.hot-update.js 7.5 KiB
+cached modules 1.27 MiB [cached] 41 modules
+runtime modules 27.5 KiB 14 modules
+./node_modules/css-loader/dist/cjs.js!./src/App.css 4.87 KiB [built] [code generated]
+webpack 5.99.9 compiled successfully in 37 ms
