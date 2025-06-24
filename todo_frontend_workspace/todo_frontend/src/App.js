@@ -1,6 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
+/**
+ * PUBLIC_INTERFACE
+ * ThemeToggle Component
+ * 
+ * A button allowing users to switch between light and dark mode.
+ * Includes animated sun/moon SVG with accessible labeling.
+ */
+function ThemeToggle({ theme, setTheme }) {
+  const isDark = theme === 'dark';
+  return (
+    <button
+      className="theme-toggle"
+      aria-pressed={isDark}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      tabIndex={0}
+      title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+    >
+      {isDark ? (
+        // Moon SVG
+        <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="#111726" />
+          <path d="M18 12A6 6 0 0 1 12 6c0-2.2 0.9-3.7 2.2-4.7A10 10 0 1 0 22 16.2 6.44 6.44 0 0 1 18 12z" fill="#f2eada" />
+        </svg>
+      ) : (
+        // Sun SVG
+        <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="6" fill="#ffecb3" />
+          <g stroke="#fbc02d" strokeWidth="1.8">
+            <line x1="12" y1="2" x2="12" y2="4" />
+            <line x1="12" y1="20" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="4" y2="12" />
+            <line x1="20" y1="12" x2="22" y2="12" />
+            <line x1="5" y1="5" x2="6.6" y2="6.6" />
+            <line x1="18" y1="18" x2="19.6" y2="19.6" />
+            <line x1="5" y1="19" x2="6.6" y2="17.4" />
+            <line x1="18" y1="6" x2="19.6" y2="7.6" />
+          </g>
+        </svg>
+      )}
+    </button>
+  );
+}
 /*
 PUBLIC_INTERFACE
 TaskItem Component
@@ -13,12 +56,40 @@ Props:
 - onToggleComplete: function(task.id) => void
 */
 function TaskItem({ task, onEdit, onDelete, onToggleComplete }) {
+  // Improve a11y: Keyboard, aria, ripple, icons
+  const cardRef = useRef();
+  const handleKey = e => {
+    if (e.key === "Enter") onEdit(task);
+    else if (e.key === "Delete" || e.key === "Backspace") onDelete(task.id);
+    else if (e.key === " ") onToggleComplete(task.id);
+  };
+
+  // Simple ripple effect on click (for micro-animation)
+  const ripple = e => {
+    const button = e.currentTarget;
+    const circle = document.createElement('span');
+    circle.className = 'ripple';
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.nativeEvent.offsetX - diameter / 2}px`;
+    circle.style.top = `${e.nativeEvent.offsetY - diameter / 2}px`;
+    button.appendChild(circle);
+    setTimeout(() => circle.remove(), 540);
+  };
+
   return (
     <div
       className={`task-card${task.completed ? ' completed' : ''}`}
       tabIndex={0}
       aria-label={`${task.completed ? 'Completed' : 'Incomplete'} task: ${task.title}`}
-      style={{ animation: 'fadeInUp 0.42s cubic-bezier(.3,.81,.52,1.02)' }}
+      style={{
+        animation: 'fadeInUp 0.42s cubic-bezier(.3,.81,.52,1.02)',
+        boxShadow: task.completed
+          ? '0 2px 12px 0px rgba(120,140,120,0.05)'
+          : '0 4px 24px 0px rgba(36,114,57,0.11),0 1.9px 4px 0px rgba(23,23,34,0.10)'
+      }}
+      ref={cardRef}
+      onKeyDown={handleKey}
     >
       <div className="task-main">
         <label className="checkbox-custom">
@@ -27,6 +98,7 @@ function TaskItem({ task, onEdit, onDelete, onToggleComplete }) {
             checked={task.completed}
             onChange={() => onToggleComplete(task.id)}
             aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+            tabIndex={0}
           />
           <span />
         </label>
@@ -34,20 +106,31 @@ function TaskItem({ task, onEdit, onDelete, onToggleComplete }) {
       </div>
       <div className="task-actions">
         <button
-          className="btn btn-secondary btn-anim"
+          className="btn btn-secondary btn-anim icon-btn"
           title="Edit Task"
           aria-label="Edit Task"
-          onClick={() => onEdit(task)}
+          tabIndex={0}
+          onClick={e => { ripple(e); onEdit(task); }}
         >
-          <span role="img" aria-label="Edit">✏️</span>
+          {/* Modern Pencil SVG */}
+          <svg viewBox="0 0 20 20" width={20} height={20} fill="none" aria-hidden="true">
+            <path d="M13.7 3.3a1.3 1.3 0 0 1 1.84 0l1.16 1.16a1.3 1.3 0 0 1 0 1.84l-7.76 7.75-3.03.37a.7.7 0 0 1-.78-.78l.37-3.03 7.76-7.76zM15.88 6.12l-1.99-1.99" stroke="#58A342" strokeWidth="1.3" strokeLinecap="round"/>
+          </svg>
         </button>
         <button
-          className="btn btn-danger btn-anim"
+          className="btn btn-danger btn-anim icon-btn"
           title="Delete Task"
           aria-label="Delete Task"
-          onClick={() => onDelete(task.id)}
+          tabIndex={0}
+          onClick={e => { ripple(e); onDelete(task.id); }}
         >
-          <span role="img" aria-label="Delete">🗑️</span>
+          {/* Modern Trash SVG */}
+          <svg viewBox="0 0 20 20" width={20} height={20} aria-hidden="true">
+            <rect x="5.3" y="7.3" width="9.4" height="8.2" rx="1.2" fill="none" stroke="#C43C39" strokeWidth="1.3"/>
+            <rect x="8.2" y="9.2" width="1.1" height="4.1" rx=".5" fill="#C43C39" />
+            <rect x="10.7" y="9.2" width="1.1" height="4.1" rx=".5" fill="#C43C39" />
+            <path d="M8.6 5.7V4.5a1 1 0 0 1 1-1h.8a1 1 0 0 1 1 1v1.2M4.3 7.2h11.4" stroke="#C43C39" strokeWidth="1.2"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -174,6 +257,22 @@ function App() {
   const [tasks, setTasks] = useState(initialTasks);
   const [editingTask, setEditingTask] = useState(null);
 
+  // Theme state/persistence
+  const [theme, setTheme] = useState(() => {
+    const saved = window.localStorage.getItem('tfe_theme_mode');
+    if (saved) return saved;
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return 'light';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    document.body.classList.toggle('theme-light', theme === 'light');
+    document.body.classList.toggle('theme-dark', theme === 'dark');
+    window.localStorage.setItem('tfe_theme_mode', theme);
+  }, [theme]);
+
   const handleAddOrEdit = ({ title, id }) => {
     if (id) {
       setTasks(tasks =>
@@ -195,20 +294,24 @@ function App() {
       )
     );
 
+  // Modern gradient, animated background with theme classes
   return (
-    <div className="app">
-      <nav className="navbar glassy">
+    <div className={`app app-gradient theme-${theme}`}>
+      <nav className="navbar glassy" tabIndex={-1}>
         <div className="container navbar-row">
           <span className="logo" tabIndex={0} aria-label="TaskEase Logo">
-            <span className="logo-symbol">*</span> TaskEase
+            <span className="logo-symbol">★</span> TaskEase
           </span>
-          <span className="navbar-right">Modern To-Do List App</span>
+          <div className="navbar-right" style={{display:"flex", alignItems:"center", gap:"14px"}}>
+            <span style={{fontWeight:500}}>Modern To-Do List App</span>
+            <ThemeToggle theme={theme} setTheme={setTheme} />
+          </div>
         </div>
       </nav>
-      <main className="main-content">
+      <main className="main-content" tabIndex={-1}>
         <div className="container task-container">
           <div className="section">
-            <h1 className="title shrinkin">
+            <h1 className="title shrinkin" tabIndex={0}>
               {editingTask ? "Edit Task" : "Add a Task"}
             </h1>
             <TaskForm
@@ -218,7 +321,7 @@ function App() {
             />
           </div>
           <div className="section">
-            <h2 className="subtitle fadein-delay" style={{ marginTop: 32, marginBottom: 12 }}>
+            <h2 className="subtitle fadein-delay" style={{ marginTop: 32, marginBottom: 12 }} tabIndex={0}>
               Your Tasks
             </h2>
             <TaskList
